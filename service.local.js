@@ -1,9 +1,9 @@
 /**
  * Created by zhangliqing on 2017/9/15.
  */
-exports = {
+module.exports = {
   rancher: {
-    endpoint: process.env.RANCHER_ENDPOINT,//去单引号
+    endpoint: 'http://117.50.1.134:8080/v2-beta',//去单引号
     user: process.env.RANCHER_USER,
     pass: process.env.RANCHER_PASS,
     env:process.env.RANCHER_ENV
