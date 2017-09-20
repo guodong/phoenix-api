@@ -16,8 +16,7 @@ var instanceSchema = mongoose.Schema({
   "rancher_container_id": String,
   "user_id": String,
   memory: Number,
-  timestamp:Date,
-  ws:String
+  timestamp:Date
 });
 var cloudwareSchema = mongoose.Schema({
   name: String,
