@@ -6,28 +6,18 @@ var bodyParser = require('body-parser');
 var request = require('request');
 var rp = require('request-promise');
 var service = require('./service.local');
-var Models = require('./database');
-var jwt = require('jsonwebtoken');
-
-
+var shortid = require('shortid');
+var cors = require('cors')
 
 var app = express();
 var router = express.Router();
 var port = process.env.PORT || 8080;
 
-var verifyToken = function (req,res,next) {
-  if(req.headers.secret != 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MDU4MTM0NTd9.Ftw1yHeUrqdNvymFZcIpuEoS0RHBFZqu4MfUZON9Zm0'){
-    res.send(401,'Authentication failed.');
-    return;
-  }
-  next();
-}
 
-
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+app.use(cors())
 app.use('/', router);
-router.use(verifyToken);
 
 //生成token  var token = jwt.sign({ foo: 'bar' }, 'shhhguanshanhh');
 // 初始时插入cloudware
@@ -39,110 +29,185 @@ router.use(verifyToken);
 //     console.log('insert successfully!');
 // })
 
-router.route('/instance')
-  .get(function (req,res) {
-    Models.Instance.find({user_id: req.headers.user_id},function (err,instances) {
-      if(err){
-        res.send(500,'Database error.')
-        return console.error(err);
-      }
-      res.send(200,instances);
-    });
-  }) 
-  .post(function (req,res) {
-    Models.Cloudware.find({_id:req.body.cloudware_id},function (err,cloudwareArray) {
-      if(err){
-        res.send(404,'Cloudware not found.');
-        return;
-      }
-      var cloudware = cloudwareArray.pop();
-      var data= {
-        instanceTriggeredStop: "stop",
-        startOnCreate: true,
-        privileged: false,
-        stdinOpen: true,
-        tty: true,
-        readOnly: false,
-        type: "container",
-        imageUuid: "docker:" + cloudware.image,
-        ports: ["5678/tcp"],
-        environment: {
-          DISPLAY: '',
-          FILE: '' //$file = $request->file;   ？？？？
-        },
-        labels: {
-          "io.rancher.scheduler.affinity:host_label": "cloudware=true"
-        },
-        command: ['sh']
-      };
-      if(cloudware.memory != null) data.memory=cloudware.memory*(1<<30)
+// shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$-');
 
-      var instance=new Models.Instance();
-      instance['user_id'] = req.body.user_id;
-      request.post({url:service.rancher.endpoint+'/projects/1a3504/container', json: data},function (err,httpResponse,body) {
-        if(err){
-          res.send(500,'post to rancher error.')
-          return;
-        }
-        instance.rancher_container_id = body.id;
-        instance.cloudware_id = cloudware._id;
-        instance.memory = cloudware.memory;
-      });
+router.route('/instances').post(function (req, res) {
+  var serviceName = shortid.generate()
+  serviceName = serviceName.replace('_', 'aa')
+  serviceName = serviceName.replace('-', 'bb')
+  console.log('create service: ' + serviceName)
+  var data = {
+    "scale": 1,
+    "assignServiceIpAddress": false,
+    "startOnCreate": true,
+    "type": "service",
+    "stackId": "1st15",
+    "launchConfig": {
+      "instanceTriggeredStop": "stop",
+      "kind": "container",
+      "networkMode": "managed",
+      "privileged": false,
+      "publishAllPorts": false,
+      "readOnly": false,
+      "runInit": false,
+      "startOnCreate": true,
+      "stdinOpen": true,
+      "tty": true,
+      "vcpu": 1,
+      "type": "launchConfig",
+      "labels": {
+        "io.rancher.container.pull_image": "always",
+        "io.rancher.scheduler.affinity:host_label": "cloudware=true"
+      },
+      "restartPolicy": {"name": "always"},
+      "secrets": [],
+      "dataVolumes": [],
+      "dataVolumesFrom": [],
+      "dns": [],
+      "dnsSearch": [],
+      "capAdd": [],
+      "capDrop": [],
+      "devices": [],
+      "logConfig": {"driver": "", "config": {}},
+      "dataVolumesFromLaunchConfigs": [],
+      "imageUuid": "docker:daocloud.io/guodong/xfce4-pulsar-ide-xterm",
+      "ports": [],
+      "blkioWeight": null,
+      "cgroupParent": null,
+      "count": null,
+      "cpuCount": null,
+      "cpuPercent": null,
+      "cpuPeriod": null,
+      "cpuQuota": null,
+      "cpuSet": null,
+      "cpuSetMems": null,
+      "cpuShares": null,
+      "createIndex": null,
+      "created": null,
+      "deploymentUnitUuid": null,
+      "description": null,
+      "diskQuota": null,
+      "domainName": null,
+      "externalId": null,
+      "firstRunning": null,
+      "healthInterval": null,
+      "healthRetries": null,
+      "healthState": null,
+      "healthTimeout": null,
+      "hostname": null,
+      "ioMaximumBandwidth": null,
+      "ioMaximumIOps": null,
+      "ip": null,
+      "ip6": null,
+      "ipcMode": null,
+      "isolation": null,
+      "kernelMemory": null,
+      "memory": null,
+      "memoryMb": null,
+      "memoryReservation": null,
+      "memorySwap": null,
+      "memorySwappiness": null,
+      "milliCpuReservation": null,
+      "oomScoreAdj": null,
+      "pidMode": null,
+      "pidsLimit": null,
+      "removed": null,
+      "requestedIpAddress": null,
+      "shmSize": null,
+      "startCount": null,
+      "stopSignal": null,
+      "user": null,
+      "userdata": null,
+      "usernsMode": null,
+      "uts": null,
+      "uuid": null,
+      "volumeDriver": null,
+      "workingDir": null,
+      "networkLaunchConfig": null
+    },
+    "secondaryLaunchConfigs": [],
+    "name": serviceName,
+    "createIndex": null,
+    "created": null,
+    "description": null,
+    "externalId": null,
+    "healthState": null,
+    "kind": null,
+    "removed": null,
+    "selectorContainer": null,
+    "selectorLink": null,
+    "uuid": null,
+    "vip": null,
+    "fqdn": null
+  };
+  switch (req.body.cloudware) {
+    case 'rstudio':
+      data.launchConfig.imageUuid = "docker:daocloud.io/guodong/xfce4-pulsar-ide-rstudio"
 
-      var ip,count=0;
-      var getPrip=function () {
-        if(count++ == 10){
-          res.send(500,'Get private ip error.');
-          return;
-        }
-        setTimeout(function(){
-          ip = getPrivateIp(instance.rancher_container_id);
-          if(!ip){
-            getPrip()
-          }else {
-            instance.ws = 'ws://' + service.proxy.server + '/pulsar-' + instance.id;
-            instance.save(function (err,instance) {
-              if (err){
-                res.send(500,'Instance save to database error.')
-                return;
-              }
-              res.send(201,'Instance created success.');
-            })
-            return;
-          }
-        },1000);
-        return;
-      }
-      getPrip();
+      break;
+    case 'gedit':
+      data.launchConfig.imageUuid = "docker:daocloud.io/guodong/xfce4-pulsar-ide-gedit"
+      break;
+  }
+  request.post({
+    url: service.rancher.endpoint + '/projects/1a3504/service',
+    json: data
+  }, function (err, httpResponse, body) {
+    if (err) {
+      res.send(500, 'post to rancher error.')
+      return;
+    }
+    console.log(body)
+    request.get({
+      url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'
+    }, function (err, httpResponse, body1) {
+      var proxyData = JSON.parse(body1)
+      proxyData.lbConfig.portRules.push({
+        "protocol": "http",
+        "type": "portRule",
+        "hostname": serviceName + ".ex-lab.org",
+        "priority": 12,
+        "serviceId": body.id,
+        "sourcePort": 80,
+        "targetPort": 5678
+      })
+      request.put({
+        url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',
+        json: proxyData
+      }, function (err, httpResponse, body2) {
+        res.send(JSON.stringify({ws: 'ws://' + serviceName + '.ex-lab.org'}))
+      })
     })
-  })
+
+  });
+})
 
 router.route('/instance/:instance_id')
-  .delete(function (req,res) {
-    Models.Instance.find({_id:req.params.instance_id},function (err,instanceArray) {
-      if(err){
-        res.send(404,'Instance not found')
+  .delete(function (req, res) {
+    Models.Instance.find({_id: req.params.instance_id}, function (err, instanceArray) {
+      if (err) {
+        res.send(404, 'Instance not found')
         return
       }
       var instance = instanceArray.pop();
-      request.del({url:service.rancher.endpoint+'/projects/1a3504/containers/'+instance.rancher_container_id},function (err,httpResponse,body) {
-        if(err){
-          res.send(500,'Internal error.');
+      request.del({url: service.rancher.endpoint + '/projects/1a3504/containers/' + instance.rancher_container_id}, function (err, httpResponse, body) {
+        if (err) {
+          res.send(500, 'Internal error.');
           return;
         }
         body_j = JSON.parse(body);
-        if(body_j.id == instance.rancher_container_id){
-          Models.Instance.remove({_id: req.params.instance_id},function (err) {
-            if(err){
-              res.send(500,'Database internal error.')
+        if (body_j.id == instance.rancher_container_id) {
+          Models.Instance.remove({_id: req.params.instance_id}, function (err) {
+            if (err) {
+              res.send(500, 'Database internal error.')
               return;
             }
-            return res.send(204,'Delete success.');
+            return res.send(204, 'Delete success.');
           });
-        }else {
+        } else {
           console.log(body_j.id);
           console.log(instance.rancher_container_id);
-          res.send(500,'Internal error.')
+          res.send(500, 'Internal error.')
           return;
         }
 
@@ -152,13 +217,13 @@ router.route('/instance/:instance_id')
 
 function getPrivateIp(rancher_container_id) {
   var options = {
-    uri: service.rancher.endpoint+'/projects/1a3504/containers/'+rancher_container_id,
+    uri: service.rancher.endpoint + '/projects/1a3504/containers/' + rancher_container_id,
     //oauth: [service.rancher.user,service.rancher.pass],
-    json:true
+    json: true
   }
   return rp(options)
     .then(function (res) {
-      if(!res.primaryIpAddress){
+      if (!res.primaryIpAddress) {
         return null;
       }
       return res.primaryIpAddress;
