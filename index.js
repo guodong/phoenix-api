@@ -143,7 +143,6 @@ router.route('/instances').post(function (req, res) {
   switch (req.body.cloudware) {
     case 'rstudio':
       data.launchConfig.imageUuid = "docker:daocloud.io/guodong/xfce4-pulsar-ide-rstudio"
-
       break;
     case 'gedit':
       data.launchConfig.imageUuid = "docker:daocloud.io/guodong/xfce4-pulsar-ide-gedit"
@@ -175,7 +174,10 @@ router.route('/instances').post(function (req, res) {
         url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',
         json: proxyData
       }, function (err, httpResponse, body2) {
-        res.send(JSON.stringify({ws: 'ws://' + serviceName + '.ex-lab.org'}))
+        setTimeout(function () {
+          res.send(JSON.stringify({ws: 'ws://' + serviceName + '.ex-lab.org'}))
+        },2000)
+
       })
     })
 
@@ -210,7 +212,6 @@ router.route('/instance/:instance_id')
           res.send(500, 'Internal error.')
           return;
         }
-
       });
     });
   })
