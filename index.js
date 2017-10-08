@@ -57,7 +57,7 @@ router.route('/instances').post(function (req, res) {
       "vcpu": 1,
       "type": "launchConfig",
       "labels": {
-        "io.rancher.container.pull_image": "always",
+        //"io.rancher.container.pull_image": "always",
         "io.rancher.scheduler.affinity:host_label": "cloudware=true"
       },
       "restartPolicy": {"name": "always"},
