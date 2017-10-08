@@ -44,6 +44,7 @@ router.route('/instances').post(function (req, res) {
     "stackId": "1st15",
     "launchConfig": {
       //"environment": {"DISPLAY": ":0"},
+      "command": "startxfce4",
       "instanceTriggeredStop": "stop",
       "kind": "container",
       "networkMode": "managed",
