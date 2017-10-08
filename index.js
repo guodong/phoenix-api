@@ -146,7 +146,7 @@ router.route('/instances').post(function (req, res) {
       data.launchConfig.imageUuid = "docker:daocloud.io/guodong/xfce4-pulsar-ide-rstudio"
       break;
     case 'gedit':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/xfce4-pulsar-ide-gedit"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/xfce4-pulsar-ide-gedit-fix"
       break;
   }
   request.post({
