@@ -163,7 +163,8 @@ router.route('/instances').post(function (req, res) {
     request.get({
       url: service.rancher.endpoint + '/projects/1a3504/services/' + body.id
     }, function (err, httpResponse, body) {
-      var xfce4Id = body.instanceIds[0]
+      var parsed = JSON.parse(body);
+      var xfce4Id = parsed.instanceIds[0]
       var data = {
         "instanceTriggeredStop": "stop",
         "startOnCreate": true,
