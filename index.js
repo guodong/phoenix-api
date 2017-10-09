@@ -191,7 +191,7 @@ router.route('/instances').post(function (req, res) {
           "ports": [],
           "instanceLinks": {},
           "labels": {},
-          "name": "p1",
+          "name": serviceName + '-pulsar',
           "networkContainerId": xfce4Id,
           "command": ["pulsar"],
           "count": null,
