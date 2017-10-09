@@ -72,7 +72,7 @@ router.route('/instances').post(function (req, res) {
       "devices": [],
       "logConfig": {"driver": "", "config": {}},
       "dataVolumesFromLaunchConfigs": [],
-      "imageUuid": "docker:daocloud.io/guodong/xfce4-pulsar-ide-xterm",
+      "imageUuid": "docker:cloudwarelabs/xfce4-min",
       "ports": [],
       "blkioWeight": null,
       "cgroupParent": null,
@@ -142,14 +142,14 @@ router.route('/instances').post(function (req, res) {
     "vip": null,
     "fqdn": null
   };
-  switch (req.body.cloudware) {
-    case 'rstudio':
-      data.launchConfig.imageUuid = "docker:daocloud.io/guodong/xfce4-pulsar-ide-rstudio"
-      break;
-    case 'gedit':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/xfce4-pulsar-ide-gedit"
-      break;
-  }
+  // switch (req.body.cloudware) {
+  //   case 'rstudio':
+  //     data.launchConfig.imageUuid = "docker:daocloud.io/guodong/xfce4-pulsar-ide-rstudio"
+  //     break;
+  //   case 'gedit':
+  //     data.launchConfig.imageUuid = "docker:cloudwarelabs/xfce4-pulsar-ide-gedit"
+  //     break;
+  // }
   request.post({
     url: service.rancher.endpoint + '/projects/1a3504/service',
     json: data
@@ -159,6 +159,98 @@ router.route('/instances').post(function (req, res) {
       return;
     }
     console.log(body)
+
+    request.get({
+      url: service.rancher.endpoint + '/projects/1a3504/services/' + body.id
+    }, function (err, httpResponse, body) {
+      var xfce4Id = body.instanceIds[0]
+      var data = {
+        "instanceTriggeredStop": "stop",
+        "startOnCreate": true,
+        "publishAllPorts": false,
+        "privileged": false,
+        "stdinOpen": true,
+        "tty": true,
+        "readOnly": false,
+        "runInit": false,
+        "networkMode": "container",
+        "type": "container",
+        "requestedHostId": "1h5",
+        "secrets": [],
+        "dataVolumes": [],
+        "dataVolumesFrom": [],
+        "dns": [],
+        "dnsSearch": [],
+        "capAdd": [],
+        "capDrop": [],
+        "devices": [],
+        "logConfig": {"driver": "", "config": {}},
+        "dataVolumesFromLaunchConfigs": [],
+        "imageUuid": "docker:cloudwarelabs/pulsar",
+        "ports": [],
+        "instanceLinks": {},
+        "labels": {},
+        "name": "p1",
+        "networkContainerId": xfce4Id,
+        "command": ["pulsar"],
+        "count": null,
+        "createIndex": null,
+        "created": null,
+        "deploymentUnitUuid": null,
+        "description": null,
+        "externalId": null,
+        "firstRunning": null,
+        "healthState": null,
+        "hostname": null,
+        "kind": null,
+        "memoryReservation": null,
+        "milliCpuReservation": null,
+        "removed": null,
+        "startCount": null,
+        "uuid": null,
+        "volumeDriver": null,
+        "workingDir": null,
+        "user": null,
+        "domainName": null,
+        "memorySwap": null,
+        "memory": null,
+        "cpuSet": null,
+        "cpuShares": null,
+        "pidMode": null,
+        "blkioWeight": null,
+        "cgroupParent": null,
+        "usernsMode": null,
+        "pidsLimit": null,
+        "diskQuota": null,
+        "cpuCount": null,
+        "cpuPercent": null,
+        "ioMaximumIOps": null,
+        "ioMaximumBandwidth": null,
+        "cpuPeriod": null,
+        "cpuQuota": null,
+        "cpuSetMems": null,
+        "isolation": null,
+        "kernelMemory": null,
+        "memorySwappiness": null,
+        "shmSize": null,
+        "uts": null,
+        "ipcMode": null,
+        "stopSignal": null,
+        "oomScoreAdj": null,
+        "ip": null,
+        "ip6": null,
+        "healthInterval": null,
+        "healthTimeout": null,
+        "healthRetries": null
+      }
+
+      request.post({
+        url: service.rancher.endpoint + '/projects/1a3504/container',
+        json: data
+      })
+    })
+
+
     request.get({
       url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'
     }, function (err, httpResponse, body1) {
@@ -176,9 +268,11 @@ router.route('/instances').post(function (req, res) {
         url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',
         json: proxyData
       }, function (err, httpResponse, body2) {
+        // create pulsar container
+
         setTimeout(function () {
           res.send(JSON.stringify({ws: 'ws://' + serviceName + '.ex-lab.org'}))
-        },2000)
+        }, 2000)
 
       })
     })
