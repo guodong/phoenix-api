@@ -266,6 +266,7 @@ router.route('/instances').post(function (req, res) {
             break;
         }
         data.name = serviceName + '-cloudware'
+        data.command = null
         request.post({
           url: service.rancher.endpoint + '/projects/1a3504/container',
           json: data
