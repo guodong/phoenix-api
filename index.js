@@ -160,11 +160,14 @@ router.route('/instances').post(function (req, res) {
     }
     console.log(body)
     setTimeout(function () {
+      // get xfce4-min srvice container id
       request.get({
         url: service.rancher.endpoint + '/projects/1a3504/services/' + body.id
       }, function (err, httpResponse, body) {
         var parsed = JSON.parse(body);
         var xfce4Id = parsed.instanceIds[0]
+
+        // start pulsar
         var data = {
           "instanceTriggeredStop": "stop",
           "startOnCreate": true,
@@ -245,6 +248,24 @@ router.route('/instances').post(function (req, res) {
           "healthRetries": null
         }
 
+        request.post({
+          url: service.rancher.endpoint + '/projects/1a3504/container',
+          json: data
+        })
+
+        // start cloudware
+        switch (req.body.cloudware) {
+          case 'rstudio':
+            data.imageUuid = "docker:daocloud.io/guodong/rstudio"
+            break;
+          case 'gedit':
+            data.imageUuid = "docker:cloudwarelabs/xfce4-pulsar-ide-gedit"
+            break;
+          default:
+            data.imageUuid = "docker:daocloud.io/guodong/rstudio"
+            break;
+        }
+        data.name = serviceName + '-cloudware'
         request.post({
           url: service.rancher.endpoint + '/projects/1a3504/container',
           json: data
